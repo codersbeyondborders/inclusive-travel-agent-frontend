@@ -21,29 +21,49 @@ View your app in AI Studio: https://ai.studio/apps/drive/1qKqgDhoSsX_1PdMmURcUe-
 
 **Prerequisites:** Node.js 18+
 
-1. Install dependencies:
+1. **Start your backend server** (if you have one):
+   - Make sure your Inclusive Travel Agent backend is running at `http://localhost:8080`
+   - You can verify it's working by visiting `http://localhost:8080/docs`
+
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-2. Configure environment variables in [.env.local](.env.local):
+3. Configure environment variables in [.env.local](.env.local):
    ```bash
    # Required: Your Gemini API key for AI responses
    GEMINI_API_KEY=your_actual_api_key_here
    
-   # Optional: Backend API URL (defaults to localhost:8080)
+   # Backend API URL (should match your backend server)
    VITE_API_BASE_URL=http://localhost:8080
    
-   # Optional: Enable local storage fallback (defaults to true)
-   VITE_USE_LOCAL_STORAGE_FALLBACK=true
+   # Set to false to connect to real backend, true for offline mode
+   VITE_USE_LOCAL_STORAGE_FALLBACK=false
    ```
 
-3. Run the development server:
+4. Run the development server:
    ```bash
    npm run dev
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+### Connection Status
+
+The app will automatically test the backend connection on startup. You'll see a status indicator on the landing page:
+- 🟢 **Connected**: Successfully connected to your backend API
+- 🟡 **Testing**: Checking backend connection
+- 🔴 **Offline**: Backend unavailable, using localStorage fallback
+
+### Troubleshooting Connection Issues
+
+If you see connection failures:
+
+1. **Verify backend is running**: Visit `http://localhost:8080/docs` in your browser
+2. **Check CORS settings**: Ensure your backend allows requests from `http://localhost:3000`
+3. **Check environment variables**: Ensure `VITE_API_BASE_URL` matches your backend URL
+4. **Check browser console**: Look for detailed error messages in the developer tools
 
 ## Backend Integration
 

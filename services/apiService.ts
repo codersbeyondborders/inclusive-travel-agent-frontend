@@ -7,6 +7,36 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
   (import.meta.env.PROD 
     ? 'https://your-cloud-run-service-url' 
     : 'http://localhost:8080');
+
+// Log the configuration on startup
+console.log('API Configuration:', {
+  API_BASE_URL,
+  USE_LOCAL_STORAGE_FALLBACK: import.meta.env.VITE_USE_LOCAL_STORAGE_FALLBACK,
+  IS_ONLINE: navigator.onLine,
+  ENV_MODE: import.meta.env.MODE
+});
+
+/**
+ * Health check to test backend connectivity
+ */
+export const testBackendConnection = async (): Promise<boolean> => {
+  try {
+    console.log(`Testing backend connection to: ${API_BASE_URL}/agent/info`);
+    const response = await fetch(`${API_BASE_URL}/agent/info`);
+    
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ Backend connection successful!', data);
+      return true;
+    } else {
+      console.warn('❌ Backend responded with error:', response.status);
+      return false;
+    }
+  } catch (error) {
+    console.warn('❌ Backend connection failed:', error);
+    return false;
+  }
+};
 const DB_USER_PREFIX = 'db_user_';
 
 // --- User Profile Management ---
@@ -52,12 +82,16 @@ const defaultProfileData: Omit<UserProfile, 'user_id' | 'basic_info' | 'created_
  * Creates a new user profile.
  */
 export const createUserProfile = async (data: { name: string; email: string }): Promise<UserProfile> => {
-  // Fallback to localStorage simulation if API is not available
-  if (!navigator.onLine || API_BASE_URL.includes('localhost')) {
+  // Only use localStorage fallback if explicitly disabled or offline
+  const useLocalFallback = import.meta.env.VITE_USE_LOCAL_STORAGE_FALLBACK === 'true' && !navigator.onLine;
+  
+  if (useLocalFallback) {
+    console.log('Using localStorage fallback (offline mode)');
     return createUserProfileLocal(data);
   }
 
   try {
+    console.log(`Making API call to: ${API_BASE_URL}/users`);
     const response = await fetch(`${API_BASE_URL}/users`, {
       method: 'POST',
       headers: {
@@ -78,6 +112,7 @@ export const createUserProfile = async (data: { name: string; email: string }): 
     }
 
     const result = await response.json();
+    console.log('API response received:', result);
     return result.profile;
   } catch (error) {
     console.warn('API call failed, falling back to local storage:', error);
@@ -112,12 +147,16 @@ const createUserProfileLocal = (data: { name: string; email: string }): Promise<
  * Fetches a user profile.
  */
 export const fetchUserProfile = async (userId: string): Promise<UserProfile> => {
-  // Fallback to localStorage if API is not available
-  if (!navigator.onLine || API_BASE_URL.includes('localhost')) {
+  // Only use localStorage fallback if explicitly disabled or offline
+  const useLocalFallback = import.meta.env.VITE_USE_LOCAL_STORAGE_FALLBACK === 'true' && !navigator.onLine;
+  
+  if (useLocalFallback) {
+    console.log('Using localStorage fallback (offline mode)');
     return fetchUserProfileLocal(userId);
   }
 
   try {
+    console.log(`Making API call to: ${API_BASE_URL}/users/${userId}`);
     const response = await fetch(`${API_BASE_URL}/users/${userId}`);
     
     if (!response.ok) {
@@ -125,6 +164,7 @@ export const fetchUserProfile = async (userId: string): Promise<UserProfile> => 
     }
 
     const result = await response.json();
+    console.log('API response received:', result);
     return result.profile;
   } catch (error) {
     console.warn('API call failed, falling back to local storage:', error);
@@ -149,12 +189,16 @@ const fetchUserProfileLocal = (userId: string): Promise<UserProfile> => {
  * Updates a user profile.
  */
 export const updateUserProfile = async (userId: string, data: Partial<UserProfile>): Promise<UserProfile> => {
-  // Fallback to localStorage if API is not available
-  if (!navigator.onLine || API_BASE_URL.includes('localhost')) {
+  // Only use localStorage fallback if explicitly disabled or offline
+  const useLocalFallback = import.meta.env.VITE_USE_LOCAL_STORAGE_FALLBACK === 'true' && !navigator.onLine;
+  
+  if (useLocalFallback) {
+    console.log('Using localStorage fallback (offline mode)');
     return updateUserProfileLocal(userId, data);
   }
 
   try {
+    console.log(`Making API call to: ${API_BASE_URL}/users/${userId}`);
     const response = await fetch(`${API_BASE_URL}/users/${userId}`, {
       method: 'PUT',
       headers: {
@@ -168,6 +212,7 @@ export const updateUserProfile = async (userId: string, data: Partial<UserProfil
     }
 
     const result = await response.json();
+    console.log('API response received:', result);
     return result.profile;
   } catch (error) {
     console.warn('API call failed, falling back to local storage:', error);
@@ -205,12 +250,16 @@ const updateUserProfileLocal = async (userId: string, data: Partial<UserProfile>
  * Sends a message to the chat endpoint.
  */
 export const chat = async (body: { message: string; session_id: string; user_id?: string }): Promise<ChatApiResponse> => {
-  // Fallback to local simulation if API is not available
-  if (!navigator.onLine || API_BASE_URL.includes('localhost')) {
+  // Only use localStorage fallback if explicitly disabled or offline
+  const useLocalFallback = import.meta.env.VITE_USE_LOCAL_STORAGE_FALLBACK === 'true' && !navigator.onLine;
+  
+  if (useLocalFallback) {
+    console.log('Using localStorage fallback (offline mode)');
     return chatLocal(body);
   }
 
   try {
+    console.log(`Making API call to: ${API_BASE_URL}/chat`);
     const response = await fetch(`${API_BASE_URL}/chat`, {
       method: 'POST',
       headers: {
@@ -223,7 +272,9 @@ export const chat = async (body: { message: string; session_id: string; user_id?
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    console.log('API response received:', result);
+    return result;
   } catch (error) {
     console.warn('API call failed, falling back to local simulation:', error);
     return chatLocal(body);

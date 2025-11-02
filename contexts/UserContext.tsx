@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import { UserProfile } from '../types';
-import { fetchUserProfile, createUserProfile as apiCreateUserProfile, updateUserProfile as apiUpdateUserProfile } from '../services/apiService';
+import { fetchUserProfile, createUserProfile as apiCreateUserProfile, updateUserProfile as apiUpdateUserProfile, testBackendConnection } from '../services/apiService';
 
 interface UserContextType {
   profile: UserProfile | null;
@@ -21,6 +21,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const loadProfile = async () => {
+      // Test backend connection on startup
+      await testBackendConnection();
+      
       if (userId) {
         try {
           const userProfile = await fetchUserProfile(userId);
