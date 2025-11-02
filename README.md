@@ -3,7 +3,6 @@
 
 An accessible, AI-powered travel planning application that helps users with disabilities plan personalized trips. This frontend integrates with the Inclusive Travel Agent backend API to provide context-aware, accessibility-focused travel assistance.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1qKqgDhoSsX_1PdMmURcUe-yI4wi6Pax9
 
 ## Features
 
