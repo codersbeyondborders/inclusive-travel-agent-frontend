@@ -1,0 +1,7 @@
+{
+  "name": "Inclusive Travel Agent",
+  "description": "An AI-powered travel assistant specializing in accessible travel planning for disabled travelers, featuring text and speech interaction.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
